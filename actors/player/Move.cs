@@ -1,0 +1,114 @@
+using Godot;
+using System;
+using System.ComponentModel.Design;
+using static Godot.GD;
+namespace Dreams.Actors.Players
+{
+
+
+    public partial class Move : Node
+    {
+        [Export] public CharacterBody3D player;
+        [Export] public Node3D camera;
+        [Export] public Node3D skin;
+        private AnimationNodeStateMachinePlayback moveStateMachine;
+        private float speedModifier = 1.0f;
+        private Vector3 lastMovementDirection = Vector3.Back;
+        private float rotationSpeed = 12.0f;
+        [Export] public float speed = 8.0f;
+
+        //jump
+        [Export] float jumpHeight; //8.0
+        [Export] float jumpTimeToPeak; //0.6
+        [Export] float jumpTimeToDecend; //0.4
+
+        float coyoteTimeMax = 0.2f;
+        float jumpBufferMax = 0.5f;
+
+        float coyoteTimeCounter = 0f;
+        float jumpBufferCounter = 0f;
+
+        float jumpVelocity;
+        float jumpGravity;
+        float fallGravity;
+
+
+        public override void _Ready()
+
+        {
+            moveStateMachine = (AnimationNodeStateMachinePlayback)GetNode<AnimationTree>("../AnimationTree").Get("parameters/MoveStateMachine/playback");
+            jumpVelocity = (2.0f * jumpHeight) / jumpTimeToPeak;
+            jumpGravity = (-2.0f * jumpHeight) / (jumpTimeToPeak * jumpTimeToPeak);
+            fallGravity = (-2.0f * jumpHeight) / (jumpTimeToDecend * jumpTimeToDecend);
+
+        }
+
+        public override void _PhysicsProcess(double delta)
+        {
+            MoveLogic((float)delta);
+        }
+
+        private void MoveLogic(float _delta)
+        {
+            Vector3 velocity = player.Velocity;
+            Vector2 rawInput = Input.GetVector("left", "right", "forward", "backwards");
+            Vector3 forward = camera.GlobalBasis.Z;
+            Vector3 right = camera.GlobalBasis.X;
+            Vector3 moveDirection = forward * rawInput.Y + right * rawInput.X;
+            moveDirection = moveDirection.Normalized();
+            float _speed = speed * speedModifier;
+            if (moveDirection.Length() > 0.2f)
+            {
+                velocity.X = moveDirection.X * _speed;
+                velocity.Z = moveDirection.Z * _speed;
+                //walk animation
+                moveStateMachine.Travel("run");
+            }
+            else
+            {
+                velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
+                velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
+                //idle animation
+                moveStateMachine.Travel("idle");
+            }
+            if (moveDirection.Length() > 0.2f)
+            {
+                lastMovementDirection = moveDirection;
+            }
+            float targetAngle = Vector3.Back.SignedAngleTo(lastMovementDirection, Vector3.Up);
+            Vector3 globalRotation = skin.GlobalRotation;
+            globalRotation.Y = Mathf.LerpAngle(globalRotation.Y, targetAngle, rotationSpeed * _delta);
+            skin.GlobalRotation = globalRotation;
+
+
+            //JUMP
+            if (coyoteTimeCounter > 0f && Input.IsActionJustPressed("space"))
+            // if (Input.IsActionJustPressed("space") && player.IsOnFloor() && jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
+            {
+                velocity.Y = jumpVelocity;
+                jumpBufferCounter = 0f;
+                coyoteTimeCounter = 0f;
+            }
+            if (!player.IsOnFloor())
+            {
+                velocity.Y += (velocity.Y < 0.0f ? jumpGravity : fallGravity) * _delta;
+            }
+
+            //coyote time
+            coyoteTimeCounter = player.IsOnFloor() ? coyoteTimeMax : coyoteTimeCounter - _delta;
+            //jump buffer
+            // jumpBufferCounter = Input.IsActionJustPressed("space") ? jumpBufferMax : - _delta;
+
+            player.Velocity = velocity;
+            player.MoveAndSlide();
+        }
+
+
+
+
+
+
+
+
+    }
+}
