@@ -60,3 +60,7 @@ space={
 3d_physics/layer_2="Player"
 3d_physics/layer_3="Enemy"
 3d_physics/layer_4="Bullets"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"

@@ -82,16 +82,23 @@ namespace Dreams.Actors.Players
 
 
             //JUMP
-            if (coyoteTimeCounter > 0f && Input.IsActionJustPressed("space"))
+            if (coyoteTimeCounter > 0f && (Input.IsActionJustPressed("space") || Input.IsActionJustReleased("space")))
             // if (Input.IsActionJustPressed("space") && player.IsOnFloor() && jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
             {
                 velocity.Y = jumpVelocity;
                 jumpBufferCounter = 0f;
                 coyoteTimeCounter = 0f;
             }
+            //on air
             if (!player.IsOnFloor())
             {
-                velocity.Y += (velocity.Y < 0.0f ? jumpGravity : fallGravity) * _delta;
+                if (velocity.Y < 0.0f)
+                {
+                    velocity.Y += fallGravity * _delta;
+                }
+                else{
+                    velocity.Y += jumpGravity * _delta;
+                }
             }
 
             //coyote time
