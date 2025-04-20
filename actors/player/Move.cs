@@ -62,15 +62,24 @@ namespace Dreams.Actors.Players
                 velocity.X = moveDirection.X * _speed;
                 velocity.Z = moveDirection.Z * _speed;
                 //walk animation
-                moveStateMachine.Travel("run");
+                if (player.IsOnFloor()){
+
+                    moveStateMachine.Travel("run");
+                }
             }
             else
             {
                 velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
                 velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
                 //idle animation
-                moveStateMachine.Travel("idle");
+                if (player.IsOnFloor()){
+
+            
+                    moveStateMachine.Travel("idle");
+                }
             }
+
+            
             if (moveDirection.Length() > 0.2f)
             {
                 lastMovementDirection = moveDirection;
@@ -92,6 +101,7 @@ namespace Dreams.Actors.Players
             //on air
             if (!player.IsOnFloor())
             {
+                moveStateMachine.Travel("falling");
                 if (velocity.Y < 0.0f)
                 {
                     velocity.Y += fallGravity * _delta;
