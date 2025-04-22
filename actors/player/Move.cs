@@ -22,7 +22,7 @@ namespace Dreams.Actors.Players
         [Export] float jumpTimeToPeak; //0.6
         [Export] float jumpTimeToDecend; //0.4
 
-        float coyoteTimeMax = 0.2f;
+        float coyoteTimeMax = 0.3f;
         float jumpBufferMax = 0.5f;
 
         float coyoteTimeCounter = 0f;
@@ -32,7 +32,7 @@ namespace Dreams.Actors.Players
         float jumpGravity;
         float fallGravity;
 
-
+        Vector3 lastMoveDirection = Vector3.Zero;
         public override void _Ready()
 
         {
@@ -58,6 +58,9 @@ namespace Dreams.Actors.Players
             moveDirection = moveDirection.Normalized();
             float _speed = speed * speedModifier;
 
+            LastMoveDirection(moveDirection);
+
+
             MoveOnFloor(moveDirection, _speed, velocity);
             Jump(velocity, _delta);
             CameraRotation(moveDirection, _delta);
@@ -66,74 +69,133 @@ namespace Dreams.Actors.Players
 
         private void MoveOnFloor(Vector3 moveDirection, float _speed, Vector3 velocity)
         {
-            if (moveDirection.Length() > 0.2f)
+            if (player.IsOnFloor())
             {
-                velocity.X = moveDirection.X * _speed;
-                velocity.Z = moveDirection.Z * _speed;
-                if (player.IsOnFloor())
+                if (moveDirection.Length() > 0.2f)
                 {
-                    moveStateMachine.Travel("run");
-                }
-            }
-            else
-            {
-                velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
-                velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
-
-                if (player.IsOnFloor())
-                {
-                    moveStateMachine.Travel("idle");
-                }
-            }
-            player.Velocity = velocity;
-            player.MoveAndSlide();
-        }
-
-
-        private void Jump(Vector3 velocity, float _delta)
-        {
-            if (coyoteTimeCounter > 0f && (Input.IsActionJustPressed("space") || Input.IsActionJustReleased("space")))
-            // if (Input.IsActionJustPressed("space") && player.IsOnFloor() && jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
-            {
-                velocity.Y = jumpVelocity;
-                jumpBufferCounter = 0f;
-                coyoteTimeCounter = 0f;
-            }
-            //on air
-            if (!player.IsOnFloor())
-            {
-                moveStateMachine.Travel("falling");
-                if (velocity.Y < 0.0f)
-                {
-                    velocity.Y += fallGravity * _delta;
+                    velocity.X = moveDirection.X * _speed;
+                    velocity.Z = moveDirection.Z * _speed;
+                    if (player.IsOnFloor())
+                    {
+                        moveStateMachine.Travel("run");
+                    }
                 }
                 else
                 {
-                    velocity.Y += jumpGravity * _delta;
+                    velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
+                    velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
+
+                    if (player.IsOnFloor())
+                    {
+                        moveStateMachine.Travel("idle");
+                    }
                 }
+
             }
+            // bloquear direccion de salto en el aire, no me gusta como se siente
+            else
+            {
+                {
+                    // EN AIRE TEST
+                    // velocity.X = lastMoveDirection.X * _speed;
+                    // velocity.Z = lastMoveDirection.Z * _speed;
 
-            //coyote time
-            coyoteTimeCounter = player.IsOnFloor() ? coyoteTimeMax : coyoteTimeCounter - _delta;
-            //jump buffer
-            // jumpBufferCounter = Input.IsActionJustPressed("space") ? jumpBufferMax : - _delta;
+                    // EN SUELO TEST
+                    velocity.X = moveDirection.X * _speed;
+                    velocity.Z = moveDirection.Z * _speed;
 
+                    
+
+
+                }
+
+            }
+            /////////////////////////////////////////////////////////////////
             player.Velocity = velocity;
             player.MoveAndSlide();
         }
 
-
-        private void CameraRotation(Vector3 moveDirection, float _delta)
+    private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
+    {
+        if (!player.IsOnFloor())
         {
-            if (moveDirection.Length() > 0.2f)
+            velocity.X = lastMoveDirection.X * _speed;
+            velocity.Z = lastMoveDirection.Z * _speed;
+        }
+        else
+        {
+            velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
+            velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
+
+            if (player.IsOnFloor())
             {
-                lastMovementDirection = moveDirection;
+                moveStateMachine.Travel("idle");
             }
-            float targetAngle = Vector3.Back.SignedAngleTo(lastMovementDirection, Vector3.Up);
-            Vector3 globalRotation = skin.GlobalRotation;
-            globalRotation.Y = Mathf.LerpAngle(globalRotation.Y, targetAngle, rotationSpeed * _delta);
-            skin.GlobalRotation = globalRotation;
         }
 
+        player.Velocity = velocity;
+        player.MoveAndSlide();
     }
+
+
+    private void LastMoveDirection(Vector3 moveDirection)
+    {
+        if (player.IsOnFloor())
+        {
+            lastMoveDirection = moveDirection;
+        }
+        else
+        {
+            GD.Print(lastMoveDirection);
+        }
+    }
+
+
+    private void Jump(Vector3 velocity, float _delta)
+    {
+        if (Input.IsActionJustPressed("space") &&  coyoteTimeCounter > 0f)
+        {
+
+
+            velocity.Y = jumpVelocity;
+            jumpBufferCounter = 0f;
+            coyoteTimeCounter = 0f;
+        }
+        //on air
+        if (!player.IsOnFloor())
+        {
+            moveStateMachine.Travel("falling");
+            if (velocity.Y < 0.0f)
+            {
+                velocity.Y += fallGravity * _delta;
+            }
+            else
+            {
+                velocity.Y += jumpGravity * _delta;
+            }
+        }
+
+        //coyote time
+        coyoteTimeCounter = player.IsOnFloor() ? coyoteTimeMax : coyoteTimeCounter - _delta;
+        //jump buffer
+        // jumpBufferCounter = Input.IsActionJustPressed("space") ? jumpBufferMax : - _delta;
+
+        player.Velocity = velocity;
+        player.MoveAndSlide();
+    }
+
+
+    private void CameraRotation(Vector3 moveDirection, float _delta)
+    {
+        if (moveDirection.Length() > 0.2f)
+        {
+            lastMovementDirection = moveDirection;
+        }
+        float targetAngle = Vector3.Back.SignedAngleTo(lastMovementDirection, Vector3.Up);
+        Vector3 globalRotation = skin.GlobalRotation;
+        globalRotation.Y = Mathf.LerpAngle(globalRotation.Y, targetAngle, rotationSpeed * _delta);
+        skin.GlobalRotation = globalRotation;
+    }
+
+}
 }
