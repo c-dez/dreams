@@ -16,42 +16,51 @@ reflected_light_source = 2
 [node name="Entities" type="Node" parent="."]
 
 [node name="Player" parent="Entities" instance=ExtResource("1_f3sb7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 3.88047)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.477, 0.5, 3.88047)
 
-[node name="Ground" type="CSGCombiner3D" parent="."]
+[node name="Suelo" type="CSGCombiner3D" parent="."]
 use_collision = true
+collision_mask = 14
 
-[node name="floor" type="CSGBox3D" parent="Ground"]
+[node name="floor" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 0)
 size = Vector3(222, 1, 222)
 material = SubResource("StandardMaterial3D_fj7yv")
 metadata/_edit_lock_ = true
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="Ground"]
+[node name="CSGBox3D2" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.92222, -10.7417)
 size = Vector3(5, 6, 5)
 
-[node name="CSGBox3D4" type="CSGBox3D" parent="Ground"]
+[node name="CSGBox3D4" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 0.866026, -0.5, 0, 0.5, 0.866026, 0, 1.00446, -4.74093)
 size = Vector3(5, 5, 11)
 
-[node name="CSGBox3D3" type="CSGBox3D" parent="Ground"]
+[node name="CSGBox3D3" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 2.22222, 7.75829)
 size = Vector3(6, 5, 5)
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -18.5, 1.32222, 15.7583)
-size = Vector3(6, 2, 5)
+[node name="wall1" type="CSGBox3D" parent="Suelo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.6277, 8.11291, -32.6082)
+size = Vector3(6, 16.7814, 85.7329)
 
-[node name="CSGBox3D6" type="CSGBox3D" parent="Ground"]
+[node name="wall2" type="CSGBox3D" parent="Suelo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.0118, 8.11291, -30.2026)
+size = Vector3(6, 16.7814, 64.2773)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="Suelo"]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -18.5, 4.64595, 15.7583)
+size = Vector3(6, 13.0791, 5)
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -8.5, 1.02222, 15.7583)
 size = Vector3(6, 5, 5)
 
-[node name="CSGBox3D7" type="CSGBox3D" parent="Ground"]
+[node name="CSGBox3D7" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -8.5, 2.22222, 23.7583)
 size = Vector3(6, 5, 5)
 
-[node name="CSGBox3D" type="CSGBox3D" parent="Ground"]
+[node name="CSGBox3D" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.146382, 3, 10)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
