@@ -51,22 +51,28 @@ namespace Dreams.Actors.Players
         private void MoveLogic(float _delta)
         {
             Vector3 velocity = player.Velocity;
+            float _speed = speed * speedModifier;
+
+            LastMoveDirection(GetMoveDirection());
+
+
+            MoveOnFloor(GetMoveDirection(), _speed, velocity);
+            Jump(velocity, _delta);
+            CameraRotation(GetMoveDirection(), _delta);
+        }
+
+
+        private Vector3 GetMoveDirection()
+        {
             Vector2 rawInput = Input.GetVector("left", "right", "forward", "backwards");
             Vector3 forward = camera.GlobalBasis.Z;
             Vector3 right = camera.GlobalBasis.X;
             Vector3 moveDirection = forward * rawInput.Y + right * rawInput.X;
             moveDirection = moveDirection.Normalized();
-            float _speed = speed * speedModifier;
-
-            LastMoveDirection(moveDirection);
+            return moveDirection;
 
 
-            MoveOnFloor(moveDirection, _speed, velocity);
-            Jump(velocity, _delta);
-            CameraRotation(moveDirection, _delta);
         }
-
-
         private void MoveOnFloor(Vector3 moveDirection, float _speed, Vector3 velocity)
         {
             if (player.IsOnFloor())
@@ -104,7 +110,7 @@ namespace Dreams.Actors.Players
                     velocity.X = moveDirection.X * _speed;
                     velocity.Z = moveDirection.Z * _speed;
 
-                    
+
 
 
                 }
@@ -115,87 +121,87 @@ namespace Dreams.Actors.Players
             player.MoveAndSlide();
         }
 
-    private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
-    {
-        if (!player.IsOnFloor())
+        private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
         {
-            velocity.X = lastMoveDirection.X * _speed;
-            velocity.Z = lastMoveDirection.Z * _speed;
-        }
-        else
-        {
-            velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
-            velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
-
-            if (player.IsOnFloor())
+            if (!player.IsOnFloor())
             {
-                moveStateMachine.Travel("idle");
-            }
-        }
-
-        player.Velocity = velocity;
-        player.MoveAndSlide();
-    }
-
-
-    private void LastMoveDirection(Vector3 moveDirection)
-    {
-        if (player.IsOnFloor())
-        {
-            lastMoveDirection = moveDirection;
-        }
-        else
-        {
-            GD.Print(lastMoveDirection);
-        }
-    }
-
-
-    private void Jump(Vector3 velocity, float _delta)
-    {
-        if (Input.IsActionJustPressed("space") &&  coyoteTimeCounter > 0f)
-        {
-
-
-            velocity.Y = jumpVelocity;
-            jumpBufferCounter = 0f;
-            coyoteTimeCounter = 0f;
-        }
-        //on air
-        if (!player.IsOnFloor())
-        {
-            moveStateMachine.Travel("falling");
-            if (velocity.Y < 0.0f)
-            {
-                velocity.Y += fallGravity * _delta;
+                velocity.X = lastMoveDirection.X * _speed;
+                velocity.Z = lastMoveDirection.Z * _speed;
             }
             else
             {
-                velocity.Y += jumpGravity * _delta;
+                velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
+                velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
+
+                if (player.IsOnFloor())
+                {
+                    moveStateMachine.Travel("idle");
+                }
+            }
+
+            player.Velocity = velocity;
+            player.MoveAndSlide();
+        }
+
+
+        private void LastMoveDirection(Vector3 moveDirection)
+        {
+            if (player.IsOnFloor())
+            {
+                lastMoveDirection = moveDirection;
+            }
+            else
+            {
+                GD.Print(lastMoveDirection);
             }
         }
 
-        //coyote time
-        coyoteTimeCounter = player.IsOnFloor() ? coyoteTimeMax : coyoteTimeCounter - _delta;
-        //jump buffer
-        // jumpBufferCounter = Input.IsActionJustPressed("space") ? jumpBufferMax : - _delta;
 
-        player.Velocity = velocity;
-        player.MoveAndSlide();
-    }
-
-
-    private void CameraRotation(Vector3 moveDirection, float _delta)
-    {
-        if (moveDirection.Length() > 0.2f)
+        private void Jump(Vector3 velocity, float _delta)
         {
-            lastMovementDirection = moveDirection;
-        }
-        float targetAngle = Vector3.Back.SignedAngleTo(lastMovementDirection, Vector3.Up);
-        Vector3 globalRotation = skin.GlobalRotation;
-        globalRotation.Y = Mathf.LerpAngle(globalRotation.Y, targetAngle, rotationSpeed * _delta);
-        skin.GlobalRotation = globalRotation;
-    }
+            if (Input.IsActionJustPressed("space") && coyoteTimeCounter > 0f)
+            {
 
-}
+
+                velocity.Y = jumpVelocity;
+                jumpBufferCounter = 0f;
+                coyoteTimeCounter = 0f;
+            }
+            //on air
+            if (!player.IsOnFloor())
+            {
+                moveStateMachine.Travel("falling");
+                if (velocity.Y < 0.0f)
+                {
+                    velocity.Y += fallGravity * _delta;
+                }
+                else
+                {
+                    velocity.Y += jumpGravity * _delta;
+                }
+            }
+
+            //coyote time
+            coyoteTimeCounter = player.IsOnFloor() ? coyoteTimeMax : coyoteTimeCounter - _delta;
+            //jump buffer
+            // jumpBufferCounter = Input.IsActionJustPressed("space") ? jumpBufferMax : - _delta;
+
+            player.Velocity = velocity;
+            player.MoveAndSlide();
+        }
+
+
+        private void CameraRotation(Vector3 moveDirection, float _delta)
+        {
+            if (moveDirection.Length() > 0.2f)
+            {
+                lastMovementDirection = moveDirection;
+            }
+            float targetAngle = Vector3.Back.SignedAngleTo(lastMovementDirection, Vector3.Up);
+            Vector3 globalRotation = skin.GlobalRotation;
+            globalRotation.Y = Mathf.LerpAngle(globalRotation.Y, targetAngle, rotationSpeed * _delta);
+            skin.GlobalRotation = globalRotation;
+        }
+
+    }
 }
