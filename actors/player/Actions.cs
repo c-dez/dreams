@@ -7,7 +7,15 @@ public partial class Actions : Node
 	{
 	}
 
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
+	}
+
+	private void Attack()
+	{
+		if (Input.IsActionJustPressed("mb1"))
+		{
+			GD.Print("mn1");
+		}
 	}
 }

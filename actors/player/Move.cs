@@ -22,6 +22,9 @@ namespace Dreams.Actors.Players
         [Export] float jumpTimeToPeak; //0.6
         [Export] float jumpTimeToDecend; //0.4
 
+        //area detection para wall jump PENDIENTE
+        [Export] private Area3D wallArea;
+
         float coyoteTimeMax = 0.3f;
         float jumpBufferMax = 0.5f;
 
@@ -41,11 +44,25 @@ namespace Dreams.Actors.Players
             jumpGravity = (-2.0f * jumpHeight) / (jumpTimeToPeak * jumpTimeToPeak);
             fallGravity = (-2.0f * jumpHeight) / (jumpTimeToDecend * jumpTimeToDecend);
 
+            wallArea.BodyEntered += OnBodyEnteredSignal;
+            wallArea.AreaEntered += OnAreaEntered;
+
+
         }
 
         public override void _PhysicsProcess(double delta)
         {
             MoveLogic((float)delta);
+        }
+
+        private void OnBodyEnteredSignal( Node3D body)
+        {
+            GD.Print("body entered");
+        }
+
+        private void OnAreaEntered(Node3D area)
+        {
+            GD.Print("area entered");
         }
 
         private void MoveLogic(float _delta)
@@ -73,6 +90,8 @@ namespace Dreams.Actors.Players
 
 
         }
+
+
         private void MoveOnFloor(Vector3 moveDirection, float _speed, Vector3 velocity)
         {
             if (player.IsOnFloor())
@@ -121,6 +140,7 @@ namespace Dreams.Actors.Players
             player.MoveAndSlide();
         }
 
+
         private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
         {
             if (!player.IsOnFloor())
@@ -152,7 +172,7 @@ namespace Dreams.Actors.Players
             }
             else
             {
-                GD.Print(lastMoveDirection);
+                // GD.Print(lastMoveDirection);
             }
         }
 
