@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 run/max_fps=60
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/initial_position_type=4
+
 [dotnet]
 
 project/assembly_name="Dreams"
