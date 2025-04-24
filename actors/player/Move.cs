@@ -1,6 +1,8 @@
 using Godot;
 using System;
 using System.ComponentModel.Design;
+using System.Net.Http.Headers;
+using System.Windows.Markup;
 using static Godot.GD;
 namespace Dreams.Actors.Players
 {
@@ -36,6 +38,21 @@ namespace Dreams.Actors.Players
         float fallGravity;
 
         Vector3 lastMoveDirection = Vector3.Zero;
+
+        //squash
+        private float _squashAndStretch = 1.0f;
+        public float SquashAndStretch
+        {
+            get => _squashAndStretch;
+            set
+            {
+                _squashAndStretch = value;
+                float negative = 1.0f + (1.0f - _squashAndStretch);
+                skin.Scale = new Vector3(negative, _squashAndStretch, negative);
+            }
+        }
+
+
         public override void _Ready()
 
         {
@@ -55,7 +72,7 @@ namespace Dreams.Actors.Players
             MoveLogic((float)delta);
         }
 
-        private void OnBodyEnteredSignal( Node3D body)
+        private void OnBodyEnteredSignal(Node3D body)
         {
             GD.Print("body entered");
         }
@@ -181,11 +198,11 @@ namespace Dreams.Actors.Players
         {
             if (Input.IsActionJustPressed("space") && coyoteTimeCounter > 0f)
             {
-
-
                 velocity.Y = jumpVelocity;
                 jumpBufferCounter = 0f;
                 coyoteTimeCounter = 0f;
+
+                DoSquashAndStretch(1.2f, 0.2f);
             }
             //on air
             if (!player.IsOnFloor())
@@ -223,5 +240,13 @@ namespace Dreams.Actors.Players
             skin.GlobalRotation = globalRotation;
         }
 
+
+        private void DoSquashAndStretch(float value, float duration = 1.0f)
+        {
+            Tween tween = CreateTween();
+            tween.TweenProperty(this, "SquashAndStretch", value, duration);
+            tween.TweenProperty(this, "SquashAndStretch", 1.0f, duration * 1.8f).SetEase(Tween.EaseType.Out);
+            GD.Print("sads");
+        }
     }
 }

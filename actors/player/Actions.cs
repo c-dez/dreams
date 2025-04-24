@@ -11,13 +11,13 @@ public partial class Actions : Node
     {
         animationTree = GetNode<AnimationTree>("../AnimationTree");
         attackStateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get("parameters/AttackStateMachine/playback");
-	
+
     }
 
     public override void _PhysicsProcess(double delta)
     {
         Attack();
-        GD.Print(isAttacking);
+        // GD.Print(isAttacking);
         
     }
 
