@@ -1,8 +1,5 @@
 using Godot;
-using System;
-using System.ComponentModel.Design;
-using System.Net.Http.Headers;
-using System.Windows.Markup;
+
 using static Godot.GD;
 namespace Dreams.Actors.Players
 {
@@ -41,7 +38,7 @@ namespace Dreams.Actors.Players
 
         //squash
         private float _squashAndStretch = 1.0f;
-        public float SquashAndStretch
+        private float SquashAndStretch
         {
             get => _squashAndStretch;
             set
@@ -52,7 +49,9 @@ namespace Dreams.Actors.Players
             }
         }
 
-
+        // wall jump
+        private bool canWallJump = false;
+        private float wallJumpForce = 5.5f;
         public override void _Ready()
 
         {
@@ -61,8 +60,9 @@ namespace Dreams.Actors.Players
             jumpGravity = (-2.0f * jumpHeight) / (jumpTimeToPeak * jumpTimeToPeak);
             fallGravity = (-2.0f * jumpHeight) / (jumpTimeToDecend * jumpTimeToDecend);
 
-            wallArea.BodyEntered += OnBodyEnteredSignal;
+            //conectar signals
             wallArea.AreaEntered += OnAreaEntered;
+            wallArea.AreaExited += OnAreaExited;
 
 
         }
@@ -70,16 +70,41 @@ namespace Dreams.Actors.Players
         public override void _PhysicsProcess(double delta)
         {
             MoveLogic((float)delta);
+            WallJump();
         }
 
-        private void OnBodyEnteredSignal(Node3D body)
+
+        private void WallJump()
         {
-            GD.Print("body entered");
+            Vector3 velocity = player.Velocity;
+            if (canWallJump)
+            {
+                if (!player.IsOnFloor())
+                {
+                    if (Input.IsActionJustPressed("space"))
+                    {
+                        DoSquashAndStretch(1.2f, 0.2f);
+                        velocity.Y = wallJumpForce;
+                        canWallJump = false;
+                    }
+
+                }
+
+            }
+
+            player.Velocity = velocity;
+            player.MoveAndSlide();
         }
+
 
         private void OnAreaEntered(Node3D area)
         {
-            GD.Print("area entered");
+            canWallJump = true;
+        }
+
+        private void OnAreaExited(Node3D area)
+        {
+            canWallJump = false;
         }
 
         private void MoveLogic(float _delta)
@@ -159,6 +184,7 @@ namespace Dreams.Actors.Players
 
 
         private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
+        // SIN USAR
         {
             if (!player.IsOnFloor())
             {
@@ -187,10 +213,7 @@ namespace Dreams.Actors.Players
             {
                 lastMoveDirection = moveDirection;
             }
-            else
-            {
-                // GD.Print(lastMoveDirection);
-            }
+
         }
 
 
@@ -246,7 +269,8 @@ namespace Dreams.Actors.Players
             Tween tween = CreateTween();
             tween.TweenProperty(this, "SquashAndStretch", value, duration);
             tween.TweenProperty(this, "SquashAndStretch", 1.0f, duration * 1.8f).SetEase(Tween.EaseType.Out);
-            GD.Print("sads");
         }
+
+
     }
 }

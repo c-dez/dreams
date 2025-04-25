@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://b0lxd2j81xlt7"]
+[gd_scene load_steps=8 format=3 uid="uid://b0lxd2j81xlt7"]
 
 [ext_resource type="PackedScene" uid="uid://8hqohx0vnfx6" path="res://actors/player/player.tscn" id="1_f3sb7"]
 [ext_resource type="PackedScene" uid="uid://b7jj14hxgj0rc" path="res://actors/enemies/testEnemy/test_enemy.tscn" id="2_fj7yv"]
+[ext_resource type="PackedScene" uid="uid://tc6iddqc0o8s" path="res://test/walltest.tscn" id="3_tlwt5"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fj7yv"]
 albedo_color = Color(0.344076, 0.344076, 0.344076, 1)
@@ -11,6 +12,12 @@ background_color = Color(0.252444, 0.453844, 0.237583, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.674815, 0.674815, 0.674815, 1)
 reflected_light_source = 2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fj7yv"]
+size = Vector3(1, 20, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tlwt5"]
+size = Vector3(1, 20, 40)
 
 [node name="World" type="Node3D"]
 
@@ -47,17 +54,11 @@ size = Vector3(5, 5, 11)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 2.22222, 7.75829)
 size = Vector3(6, 5, 5)
 
-[node name="wall1" type="CSGBox3D" parent="Suelo"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.6277, 8.11291, -32.6082)
-size = Vector3(6, 16.7814, 85.7329)
+[node name="Walltest" parent="Suelo" instance=ExtResource("3_tlwt5")]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -29.7687, 8.26966, 15.7583)
 
-[node name="wall2" type="CSGBox3D" parent="Suelo"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.0118, 8.11291, -30.2026)
-size = Vector3(6, 16.7814, 64.2773)
-
-[node name="CSGBox3D5" type="CSGBox3D" parent="Suelo"]
-transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -18.5, 4.64595, 15.7583)
-size = Vector3(6, 13.0791, 5)
+[node name="Walltest2" parent="Suelo" instance=ExtResource("3_tlwt5")]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -24.9121, 7.87409, 15.7583)
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="Suelo"]
 transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -8.5, 1.02222, 15.7583)
@@ -75,3 +76,29 @@ environment = SubResource("Environment_f3sb7")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.16565, 0.986185, 0, -0.986185, 0.16565, 1.21358, 20.9369, -0.707816)
+
+[node name="Walls" type="Node3D" parent="."]
+
+[node name="wall1" type="RigidBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.9999, 10.5, -32.6082)
+collision_mask = 15
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/wall1"]
+shape = SubResource("BoxShape3D_fj7yv")
+metadata/_edit_lock_ = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/wall1"]
+mesh = SubResource("BoxMesh_tlwt5")
+metadata/_edit_lock_ = true
+
+[node name="wall2" type="RigidBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.1158, 10.5, -32.6082)
+collision_mask = 15
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/wall2"]
+shape = SubResource("BoxShape3D_fj7yv")
+metadata/_edit_lock_ = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/wall2"]
+mesh = SubResource("BoxMesh_tlwt5")
+metadata/_edit_lock_ = true
