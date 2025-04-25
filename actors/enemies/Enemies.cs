@@ -53,13 +53,15 @@ namespace Actors
                 {
                     // velocity = new Vector3(TargetVector.X, 0, TargetVector.Y) * speed;
                     Velocity = new Vector3(TargetVector.X, 0, TargetVector.Y) * speed;
+                    
+                    //animation
                     moveStateMachine.Travel("walk");
                 }
                 else
                 {
                     // velocity = Vector3.Zero;
                     Velocity = Vector3.Zero;
-                    
+                    //animation
                     moveStateMachine.Travel("idle");
 
                 }
@@ -68,6 +70,7 @@ namespace Actors
             }
             else
             {
+                    //animation
                 moveStateMachine.Travel("idle");
 
             }

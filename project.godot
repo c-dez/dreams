@@ -27,7 +27,7 @@ project/assembly_name="Dreams"
 [file_customization]
 
 folder_colors={
-"res://actors/player/": "red"
+"res://actors/": "red"
 }
 
 [input]
