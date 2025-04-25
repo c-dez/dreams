@@ -3,19 +3,20 @@ using Actors;
 
 public partial class TestEnemy : Enemies
 {
-	
-	
-	
 
-	public override void _Ready()
-	{
-		// AttackMelee();
-	}
 
-	public override void _PhysicsProcess(double delta)
-	{
-            // MoveToPlayer((float)delta);
-		
-	}
-	
+
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        base._PhysicsProcess(delta);
+
+    }
+
 }

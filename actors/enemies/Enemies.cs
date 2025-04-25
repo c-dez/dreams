@@ -4,8 +4,8 @@ namespace Actors
 {
     public partial class Enemies : CharacterBody3D
     {
-        //player quiero que se detecte por medio de grupo "Player" pero esta fallando, corregir en el futuro, por ahora tengo que poner el objeto player en inspector manualmente
-        [Export] private CharacterBody3D player;
+       
+        public CharacterBody3D player;
 
         [ExportGroup("Base Stats")]
         [Export] private int Health = 100;
@@ -22,8 +22,7 @@ namespace Actors
 
         public override void _Ready()
         {
-            //no detecta grupo "Player"
-            // player = (CharacterBody3D)GetTree().GetFirstNodeInGroup("Player");
+            player = (CharacterBody3D)GetTree().GetFirstNodeInGroup("Player");
         }
 
 
@@ -34,6 +33,7 @@ namespace Actors
 
         public virtual void MoveToPlayer(float delta)
         {
+            // en este caso si puedo modificar Velocity, dejo comentarios de la forma "vieja" como recordatorio
             // Vector3 velocity = Velocity;
             if (IsPlayerInNoticeRadius())
             {
@@ -46,11 +46,14 @@ namespace Actors
 
                 if (Position.DistanceTo(player.Position) > attackRadius)
                 {
+                    // velocity = new Vector3(TargetVector.X, 0, TargetVector.Y) * speed;
                     Velocity = new Vector3(TargetVector.X, 0, TargetVector.Y) * speed;
                 }
                 else
                 {
+                    // velocity = Vector3.Zero;
                     Velocity = Vector3.Zero;
+
                 }
                 // Velocity = velocity;
                 MoveAndSlide();
