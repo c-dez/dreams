@@ -4,7 +4,7 @@ namespace Actors
 {
     public partial class Enemies : CharacterBody3D
     {
-       
+
         public CharacterBody3D player;
 
         [ExportGroup("Base Stats")]
@@ -29,6 +29,7 @@ namespace Actors
         public override void _PhysicsProcess(double delta)
         {
             MoveToPlayer((float)delta);
+            Gravity();
         }
 
         public virtual void MoveToPlayer(float delta)
@@ -60,6 +61,16 @@ namespace Actors
             }
         }
 
+        private void Gravity()
+        {
+            if (!IsOnFloor())
+            {
+                Vector3 velocity = Velocity;
+                velocity.Y -= 10f;
+                Velocity = velocity;
+                MoveAndSlide();
+            }
+        }
 
         public void OnDead()
         {
