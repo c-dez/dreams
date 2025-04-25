@@ -17,12 +17,16 @@ namespace Actors
         [Export] private float attackRadius = 3;
 
         [ExportGroup("Nodes")]
-        [Export] private MeshInstance3D skin;
+        [Export] private Node3D skin;
         [Export] private AnimationTree animationTree;
+
+        //animation
+        private AnimationNodeStateMachinePlayback moveStateMachine;
 
         public override void _Ready()
         {
             player = (CharacterBody3D)GetTree().GetFirstNodeInGroup("Player");
+            moveStateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get("parameters/MoveStateMachine/playback");
         }
 
 
@@ -49,17 +53,27 @@ namespace Actors
                 {
                     // velocity = new Vector3(TargetVector.X, 0, TargetVector.Y) * speed;
                     Velocity = new Vector3(TargetVector.X, 0, TargetVector.Y) * speed;
+                    moveStateMachine.Travel("walk");
                 }
                 else
                 {
                     // velocity = Vector3.Zero;
                     Velocity = Vector3.Zero;
+                    
+                    moveStateMachine.Travel("idle");
 
                 }
                 // Velocity = velocity;
                 MoveAndSlide();
             }
+            else
+            {
+                moveStateMachine.Travel("idle");
+
+            }
         }
+
+
 
         private void Gravity()
         {
