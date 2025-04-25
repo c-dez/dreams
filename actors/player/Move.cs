@@ -4,7 +4,6 @@ using static Godot.GD;
 namespace Dreams.Actors.Players
 {
 
-
     public partial class Move : Node
     {
         [Export] public CharacterBody3D player;
@@ -20,21 +19,16 @@ namespace Dreams.Actors.Players
         [Export] float jumpHeight; //8.0
         [Export] float jumpTimeToPeak; //0.6
         [Export] float jumpTimeToDecend; //0.4
-
-        //area detection para wall jump PENDIENTE
-        [Export] private Area3D wallArea;
-
         float coyoteTimeMax = 0.3f;
         float jumpBufferMax = 0.5f;
-
         float coyoteTimeCounter = 0f;
         float jumpBufferCounter = 0f;
-
         float jumpVelocity;
         float jumpGravity;
         float fallGravity;
 
-        Vector3 lastMoveDirection = Vector3.Zero;
+        // nombre muy similar a lastMovementDirection cambiar por claridad
+        Vector3 lastMoveDirectionOnFloor = Vector3.Zero;
 
         //squash
         private float _squashAndStretch = 1.0f;
@@ -50,19 +44,21 @@ namespace Dreams.Actors.Players
         }
 
         // wall jump
+        [Export] private Area3D wallArea;
         private bool canWallJump = false;
         private float wallJumpForce = 5.5f;
-        public override void _Ready()
 
+
+        public override void _Ready()
         {
             moveStateMachine = (AnimationNodeStateMachinePlayback)GetNode<AnimationTree>("../AnimationTree").Get("parameters/MoveStateMachine/playback");
             jumpVelocity = (2.0f * jumpHeight) / jumpTimeToPeak;
             jumpGravity = (-2.0f * jumpHeight) / (jumpTimeToPeak * jumpTimeToPeak);
             fallGravity = (-2.0f * jumpHeight) / (jumpTimeToDecend * jumpTimeToDecend);
 
-            //conectar signals
-            wallArea.AreaEntered += OnAreaEntered;
-            wallArea.AreaExited += OnAreaExited;
+            //wall jump signals
+            wallArea.AreaEntered += OnWallAreaEntered;
+            wallArea.AreaExited += OnWallAreaExited;
 
 
         }
@@ -97,15 +93,17 @@ namespace Dreams.Actors.Players
         }
 
 
-        private void OnAreaEntered(Node3D area)
+        private void OnWallAreaEntered(Node3D area)
         {
             canWallJump = true;
         }
 
-        private void OnAreaExited(Node3D area)
+
+        private void OnWallAreaExited(Node3D area)
         {
             canWallJump = false;
         }
+
 
         private void MoveLogic(float _delta)
         {
@@ -183,35 +181,35 @@ namespace Dreams.Actors.Players
         }
 
 
-        private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
-        // SIN USAR
-        {
-            if (!player.IsOnFloor())
-            {
-                velocity.X = lastMoveDirection.X * _speed;
-                velocity.Z = lastMoveDirection.Z * _speed;
-            }
-            else
-            {
-                velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
-                velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
+        // private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
+        // // SIN USAR
+        // {
+        //     if (!player.IsOnFloor())
+        //     {
+        //         velocity.X = lastMoveDirection.X * _speed;
+        //         velocity.Z = lastMoveDirection.Z * _speed;
+        //     }
+        //     else
+        //     {
+        //         velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
+        //         velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
 
-                if (player.IsOnFloor())
-                {
-                    moveStateMachine.Travel("idle");
-                }
-            }
+        //         if (player.IsOnFloor())
+        //         {
+        //             moveStateMachine.Travel("idle");
+        //         }
+        //     }
 
-            player.Velocity = velocity;
-            player.MoveAndSlide();
-        }
+        //     player.Velocity = velocity;
+        //     player.MoveAndSlide();
+        // }
 
 
         private void LastMoveDirection(Vector3 moveDirection)
         {
             if (player.IsOnFloor())
             {
-                lastMoveDirection = moveDirection;
+                lastMoveDirectionOnFloor = moveDirection;
             }
 
         }

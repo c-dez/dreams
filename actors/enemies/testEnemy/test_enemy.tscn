@@ -1,13 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7jj14hxgj0rc"]
+[gd_scene load_steps=6 format=3 uid="uid://b7jj14hxgj0rc"]
+
+[ext_resource type="Script" uid="uid://skbflsa3gxix" path="res://actors/enemies/testEnemy/TestEnemy.cs" id="1_gma1r"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_f4cxf"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_gma1r"]
 
+[sub_resource type="BoxMesh" id="BoxMesh_gma1r"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aw7eb"]
+
 [node name="TestEnemy" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_gma1r")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_f4cxf")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="Skin" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_gma1r")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Skin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.17816)
+mesh = SubResource("BoxMesh_gma1r")
+surface_material_override/0 = SubResource("StandardMaterial3D_aw7eb")
