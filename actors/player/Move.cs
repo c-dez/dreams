@@ -6,9 +6,13 @@ namespace Dreams.Actors.Players
 
     public partial class Move : Node
     {
+        [ExportGroup("Nodes")]
         [Export] public CharacterBody3D player;
-        [Export] public Node3D camera;
         [Export] public Node3D skin;
+        [Export] private Area3D wallArea;
+        private UserInputs userInputs;
+
+        [ExportGroup("Movement")]
         private AnimationNodeStateMachinePlayback moveStateMachine;
         private float speedModifier = 1.0f;
         private Vector3 lastMovementDirection = Vector3.Back;
@@ -44,9 +48,10 @@ namespace Dreams.Actors.Players
         }
 
         // wall jump
-        [Export] private Area3D wallArea;
         private bool canWallJump = false;
         private float wallJumpForce = 5.5f;
+
+
 
 
         public override void _Ready()
@@ -60,12 +65,18 @@ namespace Dreams.Actors.Players
             wallArea.AreaEntered += OnWallAreaEntered;
             wallArea.AreaExited += OnWallAreaExited;
 
+            userInputs = GetNode<UserInputs>("../UserInputs");
+
 
         }
 
         public override void _PhysicsProcess(double delta)
         {
-            MoveLogic((float)delta);
+            Vector3 velocity = player.Velocity;
+            MoveOnFloor(userInputs.moveDirection, velocity);
+            LastMoveDirection(userInputs.moveDirection);
+            Jump(velocity, (float)delta);
+            // CameraRotation(userInputs.moveDirection, (float)delta);
             WallJump();
         }
 
@@ -83,11 +94,8 @@ namespace Dreams.Actors.Players
                         velocity.Y = wallJumpForce;
                         canWallJump = false;
                     }
-
                 }
-
             }
-
             player.Velocity = velocity;
             player.MoveAndSlide();
         }
@@ -105,37 +113,12 @@ namespace Dreams.Actors.Players
         }
 
 
-        private void MoveLogic(float _delta)
+        private void MoveOnFloor(Vector3 moveDirection, Vector3 velocity)
         {
-            Vector3 velocity = player.Velocity;
             float _speed = speed * speedModifier;
-
-            LastMoveDirection(GetMoveDirection());
-
-
-            MoveOnFloor(GetMoveDirection(), _speed, velocity);
-            Jump(velocity, _delta);
-            CameraRotation(GetMoveDirection(), _delta);
-        }
-
-
-        private Vector3 GetMoveDirection()
-        {
-            Vector2 rawInput = Input.GetVector("left", "right", "forward", "backwards");
-            Vector3 forward = camera.GlobalBasis.Z;
-            Vector3 right = camera.GlobalBasis.X;
-            Vector3 moveDirection = forward * rawInput.Y + right * rawInput.X;
-            moveDirection = moveDirection.Normalized();
-            return moveDirection;
-
-
-        }
-
-
-        private void MoveOnFloor(Vector3 moveDirection, float _speed, Vector3 velocity)
-        {
             if (player.IsOnFloor())
             {
+
                 if (moveDirection.Length() > 0.2f)
                 {
                     velocity.X = moveDirection.X * _speed;
@@ -155,54 +138,17 @@ namespace Dreams.Actors.Players
                         moveStateMachine.Travel("idle");
                     }
                 }
-
             }
-            // bloquear direccion de salto en el aire, no me gusta como se siente
             else
             {
                 {
-                    // EN AIRE TEST
-                    // velocity.X = lastMoveDirection.X * _speed;
-                    // velocity.Z = lastMoveDirection.Z * _speed;
-
-                    // EN SUELO TEST
                     velocity.X = moveDirection.X * _speed;
                     velocity.Z = moveDirection.Z * _speed;
-
-
-
-
                 }
-
             }
-            /////////////////////////////////////////////////////////////////
             player.Velocity = velocity;
             player.MoveAndSlide();
         }
-
-
-        // private void MoveOnAir(Vector3 lastMoveDirection, float _speed, Vector3 velocity)
-        // // SIN USAR
-        // {
-        //     if (!player.IsOnFloor())
-        //     {
-        //         velocity.X = lastMoveDirection.X * _speed;
-        //         velocity.Z = lastMoveDirection.Z * _speed;
-        //     }
-        //     else
-        //     {
-        //         velocity.X = Mathf.MoveToward(player.Velocity.X, 0, _speed);
-        //         velocity.Z = Mathf.MoveToward(player.Velocity.Z, 0, _speed);
-
-        //         if (player.IsOnFloor())
-        //         {
-        //             moveStateMachine.Travel("idle");
-        //         }
-        //     }
-
-        //     player.Velocity = velocity;
-        //     player.MoveAndSlide();
-        // }
 
 
         private void LastMoveDirection(Vector3 moveDirection)
@@ -211,7 +157,6 @@ namespace Dreams.Actors.Players
             {
                 lastMoveDirectionOnFloor = moveDirection;
             }
-
         }
 
 
@@ -246,19 +191,6 @@ namespace Dreams.Actors.Players
 
             player.Velocity = velocity;
             player.MoveAndSlide();
-        }
-
-
-        private void CameraRotation(Vector3 moveDirection, float _delta)
-        {
-            if (moveDirection.Length() > 0.2f)
-            {
-                lastMovementDirection = moveDirection;
-            }
-            float targetAngle = Vector3.Back.SignedAngleTo(lastMovementDirection, Vector3.Up);
-            Vector3 globalRotation = skin.GlobalRotation;
-            globalRotation.Y = Mathf.LerpAngle(globalRotation.Y, targetAngle, rotationSpeed * _delta);
-            skin.GlobalRotation = globalRotation;
         }
 
 

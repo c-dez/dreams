@@ -10,3 +10,4 @@ theresa/
 animations/
 /premade
 test/
+*.tscn
